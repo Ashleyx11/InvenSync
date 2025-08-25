@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  transition: background 0.3s ease;
+}
+:root { --ring: rgba(0, 0, 0, 0.014); }
+
+.card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 1rem;
+  padding: 1.1rem 1.1rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+.card-label { color: #424e8d; font-size: .8rem; letter-spacing: .04em; }
+.card-value { font-weight: 800; font-size: 1.8rem; }
+
+.input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: .6rem .8rem;
+  border-radius: .6rem;
+  outline: none;
+  width: 100%;
+}
+.input:focus { box-shadow: 0 0 0 3px var(--ring); }
+
+.btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: .5rem .85rem;
+  border-radius: .6rem;
+}
+.btn:hover { background: rgba(255,255,255,0.14); }
+.btn-primary {
+  background: linear-gradient(135deg,#6366f1,#22d3ee);
+  color: white;
+  padding: .55rem 1rem;
+  border-radius: .65rem;
+}
+.btn-primary:hover { filter: brightness(1.05); }
+
+.th {
+  font-weight: 600;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.td {
+  padding: .7rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sortable { cursor: pointer; }
+.sortable::after { content: " ⇅"; opacity: .35; }
+
+.low-row { background: rgba(234,179,8,.08); }
+.critical-row { background: rgba(239,68,68,.10); }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+}
+.modal-panel {
+  width: 100%;
+  max-width: 34rem;
+  background: rgba(17,24,39,.9);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  background: rgba(17,24,39,.95);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  padding: .75rem 1rem;
+  border-radius: .75rem;
+}
+
+select, option {
+  background-color: rgb(231, 231, 231);
+  color: black;
+}
+
+.dark select, .dark option {
+  background-color: #1f2937;
+  color: white;
+}
