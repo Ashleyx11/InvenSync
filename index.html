@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvenSync — Automated Inventory System</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen antialiased">
+
+  <!-- Gradient background -->
+  <div class="fixed inset-0 -z-10">
+    <div class="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-indigo-600/20 blur-3xl"></div>
+    <div class="absolute -bottom-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-cyan-500/20 blur-3xl"></div>
+  </div>
+
+  <div class="flex">
+
+    <!-- Sidebar -->
+    <aside class="hidden lg:flex lg:w-72 flex-col h-screen sticky top-0 backdrop-blur-xl bg-white/5 border-r border-white/10">
+      <div class="px-6 py-5 border-b border-white/10">
+        <div class="text-2xl font-bold tracking-wide">InvenSync</div>
+        <div class="text-xs text-slate-300 mt-1">Automated Inventory System</div>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <button data-section="dashboard" class="nav-btn w-full">Dashboard</button>
+        <button data-section="inventory" class="nav-btn w-full">Inventory</button>
+        <button data-section="sales" class="nav-btn w-full">Sales</button>
+        <button data-section="reports" class="nav-btn w-full">Reports</button>
+        <button data-section="settings" class="nav-btn w-full">Settings</button>
+      </nav>
+      <div class="p-4 border-t border-white/10 flex items-center justify-between">
+        <div class="text-xs text-slate-300">v1.0</div>
+        <button id="toggleTheme" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition">Toggle Theme</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="flex-1 w-full">
+
+      <!-- Topbar -->
+      <header class="sticky top-0 z-10 backdrop-blur-xl bg-white/5 border-b border-white/10">
+        <div class="px-4 lg:px-8 py-3 flex items-center gap-3">
+          <button id="openSidebar" class="lg:hidden px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20">Menu</button>
+          <div class="font-semibold">InvenSync</div>
+          <div class="ml-auto flex items-center gap-3">
+            <input id="globalSearch" class="input w-56 md:w-72" placeholder="Search items or categories"/>
+            <button id="addItemTop" class="btn-primary">Add Item</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <main class="p-4 lg:p-8 space-y-8">
+
+        <!-- Dashboard -->
+        <section id="section-dashboard" class="section">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card">
+              <div class="card-label">Total Items</div>
+              <div id="metricTotalItems" class="card-value">0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Low Stock</div>
+              <div id="metricLowStock" class="card-value">0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Sales Today</div>
+              <div id="metricSalesToday" class="card-value">₱0.00</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="card lg:col-span-2">
+              <div class="flex items-center justify-between mb-4">
+                <div class="text-lg font-semibold">7-Day Sales</div>
+              </div>
+              <div class="h-64">
+                <canvas id="salesChart"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="text-lg font-semibold mb-4">Top Moving Items</div>
+              <ul id="topItems" class="space-y-2 text-sm text-slate-300"></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Inventory -->
+        <section id="section-inventory" class="section hidden">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <div class="text-xl font-semibold">Inventory</div>
+            <div class="flex gap-2">
+              <input id="invSearch" class="input w-56" placeholder="Search"/>
+              <select id="invCategory" class="input w-44">
+                <option value="">All Categories</option>
+              </select>
+              <button id="addItem" class="btn-primary">Add Item</button>
+            </div>
+          </div>
+
+          <div class="card overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="text-left">
+                  <th class="th sortable" data-sort="name">Product</th>
+                  <th class="th sortable" data-sort="category">Category</th>
+                  <th class="th sortable text-right" data-sort="stock">Stock</th>
+                  <th class="th sortable text-right" data-sort="price">Price</th>
+                  <th class="th">Status</th>
+                  <th class="th">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTable"></tbody>
+            </table>
+            <div class="flex items-center justify-between mt-4">
+              <div id="pageInfo" class="text-xs text-slate-400"></div>
+              <div class="flex gap-2">
+                <button id="prevPage" class="btn">Prev</button>
+                <button id="nextPage" class="btn">Next</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sales -->
+        <section id="section-sales" class="section hidden">
+          <div class="text-xl font-semibold mb-4">Record Sale</div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="card">
+              <form id="saleForm" class="space-y-4">
+                <div>
+                  <label class="form-label">Item</label>
+                  <select id="saleItem" class="input"></select>
+                </div>
+                <div>
+                  <label class="form-label">Quantity</label>
+                  <input id="saleQty" type="number" min="1" class="input" placeholder="e.g. 2"/>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button type="reset" class="btn">Clear</button>
+                  <button type="submit" class="btn-primary">Record Sale</button>
+                </div>
+              </form>
+            </div>
+            <div class="card">
+              <div class="text-lg font-semibold mb-3">Today</div>
+              <ul id="recentSales" class="text-sm space-y-2"></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reports -->
+        <section id="section-reports" class="section hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="card">
+              <div class="text-lg font-semibold mb-2">Inventory Value</div>
+              <div class="text-3xl font-bold" id="invValue">₱0.00</div>
+              <div class="text-xs text-slate-400 mt-2">Sum of stock × price</div>
+            </div>
+            <div class="card">
+              <div class="text-lg font-semibold mb-2">Low-Stock Items</div>
+              <ul id="lowList" class="text-sm space-y-2"></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings (placeholder) -->
+        <section id="section-settings" class="section hidden">
+          <div class="card">
+            <div class="text-lg font-semibold mb-4">Settings</div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Low-stock threshold</label>
+                <input id="threshold" type="number" class="input w-40" value="5"/>
+              </div>
+              <div class="flex items-end">
+                <button id="saveSettings" class="btn-primary">Save</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit Item -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-panel">
+      <div class="text-lg font-semibold mb-4" id="modalTitle">Add Item</div>
+      <form id="itemForm" class="space-y-4">
+        <input type="hidden" id="itemId"/>
+        <div class="grid md:grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">Name</label>
+            <input id="itemName" class="input" required/>
+          </div>
+          <div>
+            <label class="form-label">Category</label>
+            <input id="itemCategory" class="input" required/>
+          </div>
+          <div>
+            <label class="form-label">Stock</label>
+            <input id="itemStock" type="number" min="0" class="input" required/>
+          </div>
+          <div>
+            <label class="form-label">Price (₱)</label>
+            <input id="itemPrice" type="number" min="0" step="0.01" class="input" required/>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelModal" class="btn">Cancel</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
